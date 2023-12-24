@@ -31,7 +31,7 @@ class Calico:
         :return:
         """
 
-        self.initialise_cats()  # Set up the cats that will be used for this game
+        self._initialise_cats()  # Set up the cats that will be used for this game
 
         # There is 3 of each pattern for each colour set put this into the bag
         colours = ["Yellow", "Red", "Purple", "Blue", "Green", "Navy"]
@@ -57,7 +57,7 @@ class Calico:
         for board in self.players_board:  # Passes the cats for set up
             board.set_cats(self.cats)
 
-    def initialise_cats(self):
+    def _initialise_cats(self):
         """
         Initialises the cats for the board game by randomly picking 3 cats out of the 5,
         and the randomly assigning them 2 patterns.
@@ -228,14 +228,10 @@ class Calico:
         the design tiles present, and finally the board layout.
         """
         board = self.get_my_board(0)
-        info = []
+        info = [board.get_score(), board.get_buttons_score(), board.get_cat_score(),
+                board.get_design_score(), board.board_colour]
 
         # Quick summary
-        info.append(board.get_score())
-        info.append(board.get_buttons_score())
-        info.append(board.get_cat_score())
-        info.append(board.get_design_score())
-        info.append(board.board_colour)
 
         # Buttons info
         buttons = board.buttons  # Gets the buttons dictionary
@@ -279,7 +275,7 @@ class Calico:
         csv_output = []
         for board in self.players_board:
             # (name , score)
-            scores.append((self.agents[board.player_num - 1].player_name, board.get_score()))  # Add it in
+            scores.append((self.agents[board.player_num - 1].player_name, board.get_score()))
             csv_output.append(self.agents[board.player_num - 1].player_name)
             csv_output.append(board.get_score())
         scores.sort(key=lambda a: a[1])
@@ -309,8 +305,8 @@ class Calico:
     def colour_info_to_one_hot(cls, colour):
         """
        Converts the string of colour into a one-hot encoded version
-       :param colour:
-       :return:
+       :param colour: String of the colour required
+       :return: Array containing one hot encoding of the colour
        """
         word_colours = ["Yellow", "Red", "Purple", "Blue", "Green", "Navy"]
         encoded_colour = []
@@ -326,8 +322,8 @@ class Calico:
     def patter_info_to_one_hot(cls, pattern):
         """
         Converts the string of pattern into a one-hot encoded version
-        :param pattern:
-        :return:
+        :param pattern: String of the pattern
+        :return: Returns array containing one-hot encoding of the pattern
         """
         # [Stripes, Leaf, Dots, Plants, Four, Reeds]
         encoded_pattern = []
@@ -344,8 +340,8 @@ class Calico:
     def requirement_to_one_one(cls, requirement):
         """
         Converts the string requirements into a one-hot encoded version
-        :param requirement:
-        :return:
+        :param requirement: String of the requirement
+        :return: Returns array containing one-hot encoding of the requirement type
         """
         encoded_requirements = []
         word_req = ["NotEqual", "aaa-bbb", "aa-bb-cc", "aaaa-bb", "aaa-bb-c", "aa-bb-c-d"]
@@ -357,6 +353,10 @@ class Calico:
         return encoded_requirements
 
     def get_state(self):
+        """
+        Return's current state of game in one-hot encoding
+        :return: returns a NP array containing encoded state
+        """
         state = []  # Array that will hold the 3D state of the game
         board = self.get_my_board(0)
         stack = self.get_my_stack(0)
@@ -402,6 +402,10 @@ class Calico:
         return flat_state
 
     def get_action_state(self):
+        """
+        Returns all legal actions (moves) that are left on the board
+        :return: Returns array containing legal moves left
+        """
         og_open = [8, 9, 10, 11, 12, 15, 16, 18, 19, 22, 23, 24, 26, 29, 31, 32,
                    33, 36, 37, 38, 39, 40]
         open_pos = self.get_my_board(0).open_positions
@@ -454,6 +458,9 @@ class Calico:
         return next_state, reward, done
 
     def get_invalid_actions(self):
+        """
+        Returns an array that contains actions that are invalid
+        """
         board = self.get_my_board(0)
         current_open = board.open_positions
         og_open = [8, 9, 10, 11, 12, 15, 16, 18, 19, 22, 23, 24, 26, 29, 31, 32,
@@ -472,6 +479,7 @@ class Calico:
         return invalid_pos
 
     def dqn_convert_move(self):
+        """Converts all possible actions into a mapping from 1 to 127"""
         # Convert the output to a playable move
         hold_actions = [(8, 0, 0), (8, 0, 1), (8, 0, 2), (8, 1, 0), (8, 1, 1), (8, 1, 2),
                         (8, 2, 0), (8, 2, 1), (8, 2, 2), (9, 0, 0), (9, 0, 1), (9, 0, 2),
@@ -515,6 +523,7 @@ class Calico:
         return mapped_actions
 
     def get_valid_moves(self):
+        """Returns all the valid moves"""
         board = self.get_my_board(0)
         og_open = [8, 9, 10, 11, 12, 15, 16, 18, 19, 22, 23, 24, 26, 29, 31, 32,
                    33, 36, 37, 38, 39, 40]
