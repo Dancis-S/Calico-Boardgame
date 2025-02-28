@@ -1,6 +1,6 @@
 """ Contains tests for the Calico class """
 import unittest
-from src import Calico
+from src.core import Calico
 
 
 class TestCalico(unittest.TestCase):

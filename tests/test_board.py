@@ -1,7 +1,6 @@
 """Tests for the Board module"""
 import unittest
-from src import Board
-from src import Cats
+from src.core import Board, Cats
 
 
 class TestBoard(unittest.TestCase):

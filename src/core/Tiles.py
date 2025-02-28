@@ -1,15 +1,17 @@
 """Classes that define the tiles that will be used in the game"""
+from collections import namedtuple
+
+neighbor = namedtuple("Neighbor", ["west", "east", "north_west", "north_east", "south_east",
+                                   "south_west"])
 
 
 class NormalTile:
-    """Represents a normal tile in the Calico game, holding information about its neighbors,
-    color, pattern, and its association with patterns or buttons."""
-
-    def __init__(self, tile_id: int):
-        """Initializes a NormalTile with a unique identifier.
-
-        :param tile_id: Unique identifier for the tile.
-        """
+    """
+    Class for the normal tiles, which hold information about its neighbors
+    the colour, pattern, and if it's part of a pattern or button.
+    Only has a get neighbors function which returns its neighbors
+    """
+    def __init__(self, tile_id):
         self.tile_id = tile_id
         self.pattern = None
         self.colour = None
@@ -25,12 +27,14 @@ class NormalTile:
         self.south_east = None
         self.south_west = None
 
-    def get_neighbors(self) -> list:
-        """Retrieves all neighboring tiles in a specified order.
-
-        :return: List of tile neighbors in the order [W, NW, NE, E, SE, SW].
+    def get_neighbors(self):
         """
-        return [self.west, self.north_west, self.north_east, self.east, self.south_east, self.south_west]
+        Function that gets all the neighboring nodes and returns them in an array. The
+        order is W, NW, NE, E, SE, SW
+        :return: Array containing tile neighbors in order W, NW, NE, E, SE, SW
+        """
+        return [self.west, self.north_west, self.north_east, self.east, self.south_east,
+                self.south_west]
 
 
 class DesignGoalTile:

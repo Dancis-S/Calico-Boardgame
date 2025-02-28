@@ -1,15 +1,12 @@
 """This file contain code that will run the actual game"""
 import random
-import numpy as np
-from src import Board
-from src import Tiles
-from src import Cats
+from src.core import Board, Cats
+from src.core import Tiles
 
 
 class Calico:
     """
-    Class for the overall game of Calico, this is also the class that the agents
-    will interact with when playing the game
+    Class for the overall game of Calico
     """
 
     def __init__(self, num_of_players, agents):
@@ -31,7 +28,7 @@ class Calico:
         :return:
         """
 
-        self._initialise_cats()  # Set up the cats that will be used for this game
+        self.initialise_cats()  # Set up the cats that will be used for this game
 
         # There is 3 of each pattern for each colour set put this into the bag
         colours = ["Yellow", "Red", "Purple", "Blue", "Green", "Navy"]
@@ -57,7 +54,7 @@ class Calico:
         for board in self.players_board:  # Passes the cats for set up
             board.set_cats(self.cats)
 
-    def _initialise_cats(self):
+    def initialise_cats(self):
         """
         Initialises the cats for the board game by randomly picking 3 cats out of the 5,
         and the randomly assigning them 2 patterns.
@@ -165,8 +162,7 @@ class Calico:
         current_stack.append(self.shop.pop(select - 1))  # Pop from shop and add to stack
         self.shop.append(self.tiles_bag.pop())  # Add random tile from bag to shop
 
-    @classmethod
-    def get_user_inputs(cls, board):
+    def get_user_inputs(board):
         """
         Collects the tile and the location that the user wants to play. Then checks that they
         are valid, if invalid they are prompted again, else return the chosen tile and the move
@@ -228,10 +224,14 @@ class Calico:
         the design tiles present, and finally the board layout.
         """
         board = self.get_my_board(0)
-        info = [board.get_score(), board.get_buttons_score(), board.get_cat_score(),
-                board.get_design_score(), board.board_colour]
+        info = []
 
         # Quick summary
+        info.append(board.get_score())
+        info.append(board.get_buttons_score())
+        info.append(board.get_cat_score())
+        info.append(board.get_design_score())
+        info.append(board.board_colour)
 
         # Buttons info
         buttons = board.buttons  # Gets the buttons dictionary
@@ -275,7 +275,7 @@ class Calico:
         csv_output = []
         for board in self.players_board:
             # (name , score)
-            scores.append((self.agents[board.player_num - 1].player_name, board.get_score()))
+            scores.append((self.agents[board.player_num - 1].player_name, board.get_score()))  # Add it in
             csv_output.append(self.agents[board.player_num - 1].player_name)
             csv_output.append(board.get_score())
         scores.sort(key=lambda a: a[1])
@@ -297,246 +297,3 @@ class Calico:
         :return:
         """
         return self.players_board[player_id]
-
-    #########################################################################
-    # #################   Code for DQN Ignore It ############################
-
-    @classmethod
-    def colour_info_to_one_hot(cls, colour):
-        """
-       Converts the string of colour into a one-hot encoded version
-       :param colour: String of the colour required
-       :return: Array containing one hot encoding of the colour
-       """
-        word_colours = ["Yellow", "Red", "Purple", "Blue", "Green", "Navy"]
-        encoded_colour = []
-        for word in word_colours:
-            if word == colour:
-                encoded_colour.append(1)
-            else:
-                encoded_colour.append(0)
-
-        return encoded_colour
-
-    @classmethod
-    def patter_info_to_one_hot(cls, pattern):
-        """
-        Converts the string of pattern into a one-hot encoded version
-        :param pattern: String of the pattern
-        :return: Returns array containing one-hot encoding of the pattern
-        """
-        # [Stripes, Leaf, Dots, Plants, Four, Reeds]
-        encoded_pattern = []
-        word_patterns = ["Stripes", "Leaf", "Dots", "Plants", "Four", "Reeds"]
-        for word in word_patterns:
-            if word == pattern:
-                encoded_pattern.append(1)
-            else:
-                encoded_pattern.append(0)
-
-        return encoded_pattern
-
-    @classmethod
-    def requirement_to_one_one(cls, requirement):
-        """
-        Converts the string requirements into a one-hot encoded version
-        :param requirement: String of the requirement
-        :return: Returns array containing one-hot encoding of the requirement type
-        """
-        encoded_requirements = []
-        word_req = ["NotEqual", "aaa-bbb", "aa-bb-cc", "aaaa-bb", "aaa-bb-c", "aa-bb-c-d"]
-        for req in word_req:
-            if requirement == req:
-                encoded_requirements.append(1)
-            else:
-                encoded_requirements.append(0)
-        return encoded_requirements
-
-    def get_state(self):
-        """
-        Return's current state of game in one-hot encoding
-        :return: returns a NP array containing encoded state
-        """
-        state = []  # Array that will hold the 3D state of the game
-        board = self.get_my_board(0)
-        stack = self.get_my_stack(0)
-
-        # Add the cats to the game state
-        cats = board.cats
-        for cat in cats:
-            cat1_info = self.patter_info_to_one_hot(cat.pattern_1)
-            state.append(cat1_info)
-            cat2_info = self.patter_info_to_one_hot(cat.pattern_2)
-            state.append(cat2_info)
-
-        # Add the board positions 0 means open position
-        for tile in board.board:
-            if isinstance(tile, Tiles.DesignGoalTile):
-                # In situation where it's a design tile we need to add its requirements
-                state.append(self.requirement_to_one_one(tile.requirement))
-            elif tile.colour is None or tile.pattern is None:
-                state.append([0, 0, 0, 0, 0, 0])  # Free colour
-                state.append([0, 0, 0, 0, 0, 0])  # Free pattern
-            else:
-                info1 = self.colour_info_to_one_hot(tile.colour)
-                info2 = self.patter_info_to_one_hot(tile.pattern)
-                state.append(info1)
-                state.append(info2)
-
-        # Add the player stack
-        for tile in stack:
-            info1 = self.colour_info_to_one_hot(tile[0])
-            info2 = self.patter_info_to_one_hot(tile[1])
-            state.append(info1)
-            state.append(info2)
-
-        # Add the shop stack
-        for tile in self.shop:
-            info1 = self.colour_info_to_one_hot(tile[0])
-            info2 = self.patter_info_to_one_hot(tile[1])
-            state.append(info1)
-            state.append(info2)
-
-        arr = np.array(state)
-        flat_state = arr.flatten()
-        return flat_state
-
-    def get_action_state(self):
-        """
-        Returns all legal actions (moves) that are left on the board
-        :return: Returns array containing legal moves left
-        """
-        og_open = [8, 9, 10, 11, 12, 15, 16, 18, 19, 22, 23, 24, 26, 29, 31, 32,
-                   33, 36, 37, 38, 39, 40]
-        open_pos = self.get_my_board(0).open_positions
-        moves = []
-        counter = 1
-        for tile in og_open:
-            if tile not in open_pos:
-                for i in range(9):
-                    counter += 1
-            else:
-                for i in range(9):
-                    moves.append(counter)
-                    counter += 1
-
-        return moves
-
-    def reset(self):
-        """
-        Method to reset the game, for when an AI wants to play a new game
-        """
-        num_of_players = self.num_of_players
-        agents = self.agents
-        self.__init__(num_of_players, agents)  # Reset the game to new
-        return self.get_state()
-
-    def step(self, action):
-        """
-        For the DQN given an action, complete the action. Then return the following:
-        the next state, the reward, and whether the game is done
-        """
-        # Convert the action to action we use
-        action_map = self.dqn_convert_move()
-        play = action_map[action]  # Get action that the game understands
-        location = play[0]
-        tile = play[1]
-        shop = play[2]
-
-        my_board = self.get_my_board(0)
-        initial_score = my_board.get_score()
-        done = False
-        self.make_a_move(0, location, tile, shop)
-
-        reward = my_board.get_score() - initial_score
-
-        if not my_board.open_positions:
-            done = True
-
-        next_state = self.get_state()
-
-        return next_state, reward, done
-
-    def get_invalid_actions(self):
-        """
-        Returns an array that contains actions that are invalid
-        """
-        board = self.get_my_board(0)
-        current_open = board.open_positions
-        og_open = [8, 9, 10, 11, 12, 15, 16, 18, 19, 22, 23, 24, 26, 29, 31, 32,
-                   33, 36, 37, 38, 39, 40]
-        counter = 0
-        invalid_pos = []
-        for pos in og_open:
-            if pos not in current_open:  # Not a valid move then add it array
-                for i in range(9):
-                    invalid_pos.append(counter)
-                    counter += 1
-            else:
-                for i in range(9):
-                    counter += 1
-
-        return invalid_pos
-
-    def dqn_convert_move(self):
-        """Converts all possible actions into a mapping from 1 to 127"""
-        # Convert the output to a playable move
-        hold_actions = [(8, 0, 0), (8, 0, 1), (8, 0, 2), (8, 1, 0), (8, 1, 1), (8, 1, 2),
-                        (8, 2, 0), (8, 2, 1), (8, 2, 2), (9, 0, 0), (9, 0, 1), (9, 0, 2),
-                        (9, 1, 0), (9, 1, 1), (9, 1, 2), (9, 2, 0), (9, 2, 1), (9, 2, 2),
-                        (10, 0, 0), (10, 0, 1), (10, 0, 2), (10, 1, 0), (10, 1, 1), (10, 1, 2),
-                        (10, 2, 0), (10, 2, 1), (10, 2, 2), (11, 0, 0), (11, 0, 1), (11, 0, 2),
-                        (11, 1, 0), (11, 1, 1), (11, 1, 2), (11, 2, 0), (11, 2, 1), (11, 2, 2),
-                        (12, 0, 0), (12, 0, 1), (12, 0, 2), (12, 1, 0), (12, 1, 1), (12, 1, 2),
-                        (12, 2, 0), (12, 2, 1), (12, 2, 2), (15, 0, 0), (15, 0, 1), (15, 0, 2),
-                        (15, 1, 0), (15, 1, 1), (15, 1, 2), (15, 2, 0), (15, 2, 1), (15, 2, 2),
-                        (16, 0, 0), (16, 0, 1), (16, 0, 2), (16, 1, 0), (16, 1, 1), (16, 1, 2),
-                        (16, 2, 0), (16, 2, 1), (16, 2, 2), (18, 0, 0), (18, 0, 1), (18, 0, 2),
-                        (18, 1, 0), (18, 1, 1), (18, 1, 2), (18, 2, 0), (18, 2, 1), (18, 2, 2),
-                        (19, 0, 0), (19, 0, 1), (19, 0, 2), (19, 1, 0), (19, 1, 1), (19, 1, 2),
-                        (19, 2, 0), (19, 2, 1), (19, 2, 2), (22, 0, 0), (22, 0, 1), (22, 0, 2),
-                        (22, 1, 0), (22, 1, 1), (22, 1, 2), (22, 2, 0), (22, 2, 1), (22, 2, 2),
-                        (23, 0, 0), (23, 0, 1), (23, 0, 2), (23, 1, 0), (23, 1, 1), (23, 1, 2),
-                        (23, 2, 0), (23, 2, 1), (23, 2, 2), (24, 0, 0), (24, 0, 1), (24, 0, 2),
-                        (24, 1, 0), (24, 1, 1), (24, 1, 2), (24, 2, 0), (24, 2, 1), (24, 2, 2),
-                        (26, 0, 0), (26, 0, 1), (26, 0, 2), (26, 1, 0), (26, 1, 1), (26, 1, 2),
-                        (26, 2, 0), (26, 2, 1), (26, 2, 2), (29, 0, 0), (29, 0, 1), (29, 0, 2),
-                        (29, 1, 0), (29, 1, 1), (29, 1, 2), (29, 2, 0), (29, 2, 1), (29, 2, 2),
-                        (31, 0, 0), (31, 0, 1), (31, 0, 2), (31, 1, 0), (31, 1, 1), (31, 1, 2),
-                        (31, 2, 0), (31, 2, 1), (31, 2, 2), (32, 0, 0), (32, 0, 1), (32, 0, 2),
-                        (32, 1, 0), (32, 1, 1), (32, 1, 2), (32, 2, 0), (32, 2, 1), (32, 2, 2),
-                        (33, 0, 0), (33, 0, 1), (33, 0, 2), (33, 1, 0), (33, 1, 1), (33, 1, 2),
-                        (33, 2, 0), (33, 2, 1), (33, 2, 2), (36, 0, 0), (36, 0, 1), (36, 0, 2),
-                        (36, 1, 0), (36, 1, 1), (36, 1, 2), (36, 2, 0), (36, 2, 1), (36, 2, 2),
-                        (37, 0, 0), (37, 0, 1), (37, 0, 2), (37, 1, 0), (37, 1, 1), (37, 1, 2),
-                        (37, 2, 0), (37, 2, 1), (37, 2, 2), (38, 0, 0), (38, 0, 1), (38, 0, 2),
-                        (38, 1, 0), (38, 1, 1), (38, 1, 2), (38, 2, 0), (38, 2, 1), (38, 2, 2),
-                        (39, 0, 0), (39, 0, 1), (39, 0, 2), (39, 1, 0), (39, 1, 1), (39, 1, 2),
-                        (39, 2, 0), (39, 2, 1), (39, 2, 2), (40, 0, 0), (40, 0, 1), (40, 0, 2),
-                        (40, 1, 0), (40, 1, 1), (40, 1, 2), (40, 2, 0), (40, 2, 1), (40, 2, 2)]
-
-        mapped_actions = {}
-        num = 0
-        for n in hold_actions:
-            mapped_actions[num] = n
-            num += 1
-        return mapped_actions
-
-    def get_valid_moves(self):
-        """Returns all the valid moves"""
-        board = self.get_my_board(0)
-        og_open = [8, 9, 10, 11, 12, 15, 16, 18, 19, 22, 23, 24, 26, 29, 31, 32,
-                   33, 36, 37, 38, 39, 40]
-        valid_moves = []
-        open_pos = board.open_positions
-        counter = 0
-        for pos in og_open:
-            if pos in open_pos:
-                for i in range(9):
-                    valid_moves.append(counter)
-                    counter += 1
-            else:
-                for i in range(9):
-                    counter += 1
-
-        return valid_moves

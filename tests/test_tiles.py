@@ -1,7 +1,7 @@
 """Tests for the Tiles module"""
 import unittest
-from src import Tiles
-from src import Board
+from src.core import Board
+from src.core import Tiles
 
 
 class TestTiles(unittest.TestCase):
