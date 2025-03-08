@@ -29,7 +29,7 @@ class Board:
             self.board.append(Tiles.NormalTile(i))
 
         # Insert the Design Pattern tiles in 17,25,30 (we start from 0 not 1)
-        requirements = ["NotEqual", "aaa-bbb", "aa-bb-cc", "aaaa-bb", "aaa-bb-c", "aa-bb-c-d"]
+        requirements = list(Tiles.PATTERN_FUNCTIONS.keys())  # Get registered goals list
         random.shuffle(requirements)  # Randomize the requirements
         self.board[17] = Tiles.DesignGoalTile(17, requirements.pop())
         self.board[25] = Tiles.DesignGoalTile(25, requirements.pop())
@@ -41,7 +41,7 @@ class Board:
         """
         self.cats = copy.deepcopy(cats)
 
-    def initialise_tiles(self):
+    def initialise_tiles(self) -> None:
         """
         Creates the connections (edges) between the tiles (nodes)
         :return:
@@ -111,22 +111,16 @@ class Board:
                         (2, 2), (5, 4), (4, 0), (1, 1), (3, 3), (5, 5)]
 
         blue_board = [(1, 5), (0, 0), (3, 5), (1, 1), (2, 4), (0, 3), (4, 0), (4, 3), (5, 4),
-                      (3, 1),
-                      (2, 0), (0, 2), (2, 3), (3, 4), (1, 3), (5, 1), (4, 5), (1, 2), (3, 0),
-                      (5, 3),
-                      (4, 4), (0, 1), (2, 5), (5, 2)]
+                      (3, 1), (2, 0), (0, 2), (2, 3), (3, 4), (1, 3), (5, 1), (4, 5), (1, 2),
+                      (3, 0), (5, 3), (4, 4), (0, 1), (2, 5), (5, 2)]
 
         green_board = [(5, 1), (0, 5), (4, 1), (5, 0), (2, 4), (0, 2), (3, 5), (2, 2), (1, 4),
-                       (3, 0),
-                       (0, 3), (2, 5), (4, 0), (5, 2), (4, 4), (1, 0), (3, 1), (5, 3), (4, 5),
-                       (1, 2),
-                       (3, 4), (0, 0), (2, 1), (1, 3)]
+                       (3, 0), (0, 3), (2, 5), (4, 0), (5, 2), (4, 4), (1, 0), (3, 1), (5, 3),
+                       (4, 5), (1, 2), (3, 4), (0, 0), (2, 1), (1, 3)]
 
         yellow_board = [(4, 4), (5, 3), (0, 0), (2, 2), (5, 5), (4, 1), (1, 4), (1, 1), (2, 5),
-                        (0, 2),
-                        (4, 3), (5, 4), (3, 5), (2, 1), (0, 5), (3, 2), (1, 0), (2, 3), (0, 4),
-                        (3, 1),
-                        (1, 5), (4, 2), (5, 0), (3, 3)]
+                        (0, 2), (4, 3), (5, 4), (3, 5), (2, 1), (0, 5), (3, 2), (1, 0), (2, 3),
+                        (0, 4), (3, 1), (1, 5), (4, 2), (5, 0), (3, 3)]
 
         if player_num == 1:
             chosen_board = purple_board

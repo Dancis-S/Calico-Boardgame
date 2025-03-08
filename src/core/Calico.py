@@ -162,6 +162,7 @@ class Calico:
         current_stack.append(self.shop.pop(select - 1))  # Pop from shop and add to stack
         self.shop.append(self.tiles_bag.pop())  # Add random tile from bag to shop
 
+    @staticmethod
     def get_user_inputs(board):
         """
         Collects the tile and the location that the user wants to play. Then checks that they

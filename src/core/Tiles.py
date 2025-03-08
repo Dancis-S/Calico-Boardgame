@@ -1,6 +1,8 @@
 """Classes that define the tiles that will be used in the game"""
 from collections import namedtuple
 
+PATTERN_FUNCTIONS = {}
+
 neighbor = namedtuple("Neighbor", ["west", "east", "north_west", "north_east", "south_east",
                                    "south_west"])
 
@@ -11,6 +13,7 @@ class NormalTile:
     the colour, pattern, and if it's part of a pattern or button.
     Only has a get neighbors function which returns its neighbors
     """
+
     def __init__(self, tile_id):
         self.tile_id = tile_id
         self.pattern = None
@@ -27,7 +30,7 @@ class NormalTile:
         self.south_east = None
         self.south_west = None
 
-    def get_neighbors(self):
+    def get_neighbors(self) -> list:
         """
         Function that gets all the neighboring nodes and returns them in an array. The
         order is W, NW, NE, E, SE, SW
@@ -44,6 +47,9 @@ class DesignGoalTile:
     Has multiple different functions that check for the different kinds of
     requirements that are in the game.
     """
+
+    pattern_functions = {}  # Dict to hold all the pattern checking functions
+
     def __init__(self, tile_id, requirement):
         self.requirement = requirement
         self.colour_complete = False
@@ -59,7 +65,7 @@ class DesignGoalTile:
         self.south_east = None
         self.south_west = None
 
-    def check_tile_complete(self):
+    def check_tile_complete(self) -> bool:
         """
         Checks that the design tile is completed (all 6 sides are connected to another
         tile). This is called before running code that checks the given requirements are met
@@ -75,7 +81,7 @@ class DesignGoalTile:
 
         return completed
 
-    def check_number_of_neighbors(self):
+    def check_number_of_neighbors(self) -> int:
         """
         Checks the amount of neighbors around the design tile, and returns
         it as an int
@@ -84,7 +90,7 @@ class DesignGoalTile:
         neighbors = list(filter(lambda item: item is not None, neighbors))
         return len(neighbors)
 
-    def check_design_goal_reached(self):
+    def check_design_goal_reached(self) -> int:
         """
         At the end of the game this function is called. Depending on what requirement
         was set, return the score that has been earned for that given tile
@@ -94,19 +100,8 @@ class DesignGoalTile:
             return 0
 
         requirement = self.requirement
-        match requirement:
-            case "NotEqual":
-                return self.not_equal_goal()
-            case "aaa-bbb":
-                return self.aaa_bbb_goal()
-            case "aa-bb-cc":
-                return self.aa_bb_cc_goal()
-            case "aaaa-bb":
-                return self.aaaa_bb_goal()
-            case "aaa-bb-c":
-                return self.aaa_bb_c_goal()
-            case "aa-bb-c-d":
-                return self.aa_bb_c_d_goal()
+        func = type(self).pattern_functions[requirement]
+        func(self)
 
     def get_neighbors(self):
         """
@@ -141,7 +136,14 @@ class DesignGoalTile:
 
         return colours_dict, patterns_dict
 
-    def not_equal_goal(self):
+    @staticmethod
+    def register_pattern(func):
+        """Decorator to register functions to the class pattern functions"""
+        PATTERN_FUNCTIONS[func.__name__] = func
+        return func
+
+    @register_pattern
+    def not_equal_goal(self) -> int:
         """
         Checks that all the neighbors are different for the tile which requires all colours
         and patterns to be different.
@@ -171,7 +173,8 @@ class DesignGoalTile:
         else:
             return 0
 
-    def aaa_bbb_goal(self):
+    @register_pattern
+    def aaa_bbb_goal(self) -> int:
         """
         Checks that there are only 2 groups with each of size 3, for colour and pattern.
         :return:
@@ -195,7 +198,8 @@ class DesignGoalTile:
         else:
             return 0
 
-    def aa_bb_cc_goal(self):
+    @register_pattern
+    def aa_bb_cc_goal(self) -> int:
         """
         Checks that the design tile has 3 different groups (colour or pattern), with each
         of length 2. i.e. 2 red, 2 green, 2 blue tiles surrounding it
@@ -220,7 +224,8 @@ class DesignGoalTile:
         else:
             return 0
 
-    def aaaa_bb_goal(self):
+    @register_pattern
+    def aaaa_bb_goal(self) -> int:
         """
         Design requirement where there are 2 groups (pattern or colour group), one with size 4 and
         other with the size 2
@@ -252,7 +257,8 @@ class DesignGoalTile:
         else:
             return 0
 
-    def aaa_bb_c_goal(self):
+    @register_pattern
+    def aaa_bb_c_goal(self) -> int:
         """
         Design requirement where there needs to be 3 groups, 1 of length 3, another of length 2,
         and a final of length 1. (can be either in terms of colour or pattern)
@@ -280,7 +286,8 @@ class DesignGoalTile:
         else:
             return 0
 
-    def aa_bb_c_d_goal(self):
+    @register_pattern
+    def aa_bb_c_d_goal(self) -> int:
         """
         Design requirement where there are 4 groups, 2 of which are of length 2 and other groups
         of length 1. (can be either in terms of colour or patterns)
