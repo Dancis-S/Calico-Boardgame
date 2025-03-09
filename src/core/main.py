@@ -1,14 +1,17 @@
 """ Main file that is run when the game is executed"""
 
 from src.core import Calico
+import Tiles
+
+print(Tiles.PATTERN_FUNCTIONS)
 
 
 def main():
     """
     This is the main function that is called when you launch the game (command line version)
     """
-    human_play()
-
+    # human_play()
+    print("\nTestMode")
 
 def human_play():
     while True:

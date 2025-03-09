@@ -380,9 +380,9 @@ class TestBoard(unittest.TestCase):
         :return:
         """
         board = Board.Board(1)
-        board.board[17].requirement = "aa-bb-cc"
-        board.board[25].requirement = "aa-bb-c-d"
-        board.board[30].requirement = "aaaa-bb"
+        board.board[17].requirement = "aa_bb_cc_goal"
+        board.board[25].requirement = "aa_bb_c_d_goal"
+        board.board[30].requirement = "aaaa_bb_goal"
 
         tibbit = Cats.Cat("Tibbit", 5, 4)
         tibbit.pattern_1 = "Stripes"
@@ -456,9 +456,9 @@ class TestBoard(unittest.TestCase):
         :return:
         """
         board = Board.Board(1)
-        board.board[17].requirement = "aa-bb-cc"
-        board.board[25].requirement = "aaaa-bb"
-        board.board[30].requirement = "aaa-bb-c"
+        board.board[17].requirement = "aa_bb_cc_goal"
+        board.board[25].requirement = "aaaa_bb_goal"
+        board.board[30].requirement = "aaa_bb_c_goal"
 
         tibbit = Cats.Cat("Tibbit", 5, 4)
         tibbit.pattern_1 = "Plants"
@@ -516,9 +516,9 @@ class TestBoard(unittest.TestCase):
         :return:
         """
         board = Board.Board(1)
-        board.board[17].requirement = 'aaa-bbb'
-        board.board[25].requirement = "aaaa-bb"
-        board.board[30].requirement = 'aa-bb-c-d'
+        board.board[17].requirement = 'aaa_bbb_goal'
+        board.board[25].requirement = "aaaa_bb_goal"
+        board.board[30].requirement = 'aa_bb_c_d_goal'
 
         tibbit = Cats.Cat("Tibbit", 5, 4)
         tibbit.pattern_1 = "Four"
@@ -578,9 +578,9 @@ class TestBoard(unittest.TestCase):
         :return:
         """
         board = Board.Board(1)
-        board.board[17].requirement = 'aaa-bb-c'
-        board.board[25].requirement = "aaaa-bb"
-        board.board[30].requirement = 'aa-bb-cc'
+        board.board[17].requirement = 'aaa_bb_c_goal'
+        board.board[25].requirement = "aaaa_bb_goal"
+        board.board[30].requirement = 'aa_bb_cc_goal'
 
         tibbit = Cats.Cat("Tibbit", 5, 4)
         tibbit.pattern_1 = "Reeds"

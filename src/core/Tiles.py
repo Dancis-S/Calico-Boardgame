@@ -100,8 +100,9 @@ class DesignGoalTile:
             return 0
 
         requirement = self.requirement
-        func = type(self).pattern_functions[requirement]
-        func(self)
+        func = PATTERN_FUNCTIONS[requirement].__get__(self)
+        score = func()
+        return score
 
     def get_neighbors(self):
         """
